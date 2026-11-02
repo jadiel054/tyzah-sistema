@@ -5,6 +5,7 @@ import { waitlist } from "@/lib/db/schema";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { normalizePhone, waLink } from "@/lib/slots";
 import { shop } from "@/lib/config";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -42,15 +43,28 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req.headers);
+    const limit = checkRateLimit(`waitlist:${ip}`, 5, 60 * 1000);
+    if (!limit.success) {
+      return NextResponse.json(
+        { error: "Muitas tentativas. Aguarde um instante para entrar na lista de espera." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const name = String(body.name || "").trim();
-    const phone = normalizePhone(String(body.phone || ""));
+    const rawPhone = String(body.phone || "").trim();
+    const phone = normalizePhone(rawPhone);
     const serviceName = body.serviceName ? String(body.serviceName).trim() : null;
-    const preferredDate = body.preferredDate ? String(body.preferredDate) : null;
+    const preferredDate = body.preferredDate ? String(body.preferredDate).trim() : null;
     const notes = body.notes ? String(body.notes).trim() : null;
 
-    if (!name || phone.length < 12) {
-      return NextResponse.json({ error: "Nome e WhatsApp obrigatórios" }, { status: 400 });
+    if (!name || name.length < 2) {
+      return NextResponse.json({ error: "Nome obrigatório e válido." }, { status: 400 });
+    }
+    if (phone.length < 12 || phone.length > 13) {
+      return NextResponse.json({ error: "Número de WhatsApp inválido." }, { status: 400 });
     }
 
     const db = getDb();
@@ -59,23 +73,29 @@ export async function POST(req: NextRequest) {
       .values({
         name,
         phone,
-        serviceName,
-        preferredDate,
-        notes,
+        serviceName: serviceName || null,
+        preferredDate: preferredDate || null,
+        notes: notes || null,
         status: "waiting",
       })
       .returning();
 
     const shopText =
-      `📋 *Lista de espera*\n${name}\nWhatsApp: ${phone}\n` +
-      (serviceName ? `Serviço: ${serviceName}\n` : "") +
-      (preferredDate ? `Preferência: ${preferredDate.split("-").reverse().join("/")}\n` : "");
+      `📋 *Lista de espera — ${shop.name}*\n` +
+      `Nome: ${name}\n` +
+      `WhatsApp: ${phone}\n` +
+      (serviceName ? `Serviço desejado: ${serviceName}\n` : "") +
+      (preferredDate ? `Data preferida: ${preferredDate.split("-").reverse().join("/")}\n` : "") +
+      (notes ? `Observações: ${notes}\n` : "");
+
+    const shopWa = waLink(shop.phone, shopText);
 
     return NextResponse.json({
       ok: true,
       entry: row,
       whatsapp: {
-        shop: waLink(shop.phone, shopText),
+        shop: shopWa,
+        message: shopText,
       },
     });
   } catch (e) {

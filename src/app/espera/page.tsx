@@ -12,7 +12,7 @@ export default function EsperaPage() {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [done, setDone] = useState(false);
+  const [doneData, setDoneData] = useState<{ whatsapp?: { shop: string } } | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,7 +35,7 @@ export default function EsperaPage() {
         setError(data.error || "Erro");
         return;
       }
-      setDone(true);
+      setDoneData(data);
     } catch {
       setError("Falha de conexão");
     } finally {
@@ -43,15 +43,25 @@ export default function EsperaPage() {
     }
   }
 
-  if (done) {
+  if (doneData) {
     return (
       <main className="min-h-screen px-5 py-16 max-w-md mx-auto text-center">
         <div className="text-4xl mb-4">📋</div>
-        <h1 className="font-display text-3xl mb-2">Você está na lista</h1>
+        <h1 className="font-display text-3xl mb-2">Você está na lista!</h1>
         <p className="text-cream/70 text-sm mb-6">
-          Quando surgir um horário, o barbeiro te avisa no WhatsApp.
+          Seu pedido foi registrado. Quando surgir uma vaga, entraremos em contato.
         </p>
-        <Link href="/" className="text-sm text-gold">Voltar ao início</Link>
+        {doneData.whatsapp?.shop && (
+          <a
+            href={doneData.whatsapp.shop}
+            target="_blank"
+            rel="noreferrer"
+            className="block w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded mb-4 text-sm"
+          >
+            Avisar a barbearia no WhatsApp (opcional)
+          </a>
+        )}
+        <Link href="/" className="text-sm text-gold block">Voltar ao início</Link>
       </main>
     );
   }
