@@ -33,15 +33,21 @@ export default function HomePage() {
           >
             Reservar horário
           </Link>
-          <a
-            href={shop.mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/espera"
             className="border border-gold/40 text-gold px-8 py-3.5 rounded text-sm tracking-wide uppercase hover:bg-gold/10 transition"
           >
-            Ver no Google Maps
-          </a>
+            Lista de espera
+          </Link>
         </div>
+        <a
+          href={shop.mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block mt-4 text-xs text-cream/50 hover:text-gold"
+        >
+          Ver no Google Maps →
+        </a>
       </header>
 
       <section className="px-5 py-12 max-w-lg mx-auto border-t border-white/5">

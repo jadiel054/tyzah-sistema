@@ -74,8 +74,9 @@ export default function AdminHojePage() {
           <h1 className="font-display text-2xl">Hoje</h1>
           <p className="text-xs text-cream/50">Painel do barbeiro</p>
         </div>
-        <div className="flex gap-3 text-xs">
+        <div className="flex gap-3 text-xs flex-wrap justify-end">
           <Link href="/admin/clientes" className="text-gold">Clientes</Link>
+          <Link href="/admin/espera" className="text-gold">Espera</Link>
           <button type="button" onClick={logout} className="text-cream/40">Sair</button>
         </div>
       </div>
