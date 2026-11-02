@@ -57,7 +57,21 @@ export const blockedSlots = pgTable("blocked_slots", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const waitlist = pgTable("waitlist", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  phone: text("phone").notNull(),
+  serviceName: text("service_name"),
+  preferredDate: date("preferred_date"),
+  notes: text("notes"),
+  status: text("status").notNull().default("waiting"), // waiting | notified | booked | cancelled
+  notifiedAt: timestamp("notified_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export type Client = typeof clients.$inferSelect;
 export type Appointment = typeof appointments.$inferSelect;
 export type Service = typeof services.$inferSelect;
 export type BlockedSlot = typeof blockedSlots.$inferSelect;
+export type WaitlistEntry = typeof waitlist.$inferSelect;
