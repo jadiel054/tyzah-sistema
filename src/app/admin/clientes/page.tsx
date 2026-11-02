@@ -38,7 +38,12 @@ export default function ClientesPage() {
     await fetch("/api/clients", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: editing.id, notes, photoUrl: photoUrl || null, lastService: lastService || null }),
+      body: JSON.stringify({
+        id: editing.id,
+        notes: notes.trim() === "" ? null : notes.trim(),
+        photoUrl: photoUrl.trim() === "" ? null : photoUrl.trim(),
+        lastService: lastService.trim() === "" ? null : lastService.trim(),
+      }),
     });
     setEditing(null);
     load(q);

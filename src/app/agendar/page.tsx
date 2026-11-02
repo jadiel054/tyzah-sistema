@@ -18,7 +18,10 @@ export default function AgendarPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState<{ whatsapp: { client: string } } | null>(null);
-  const minDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const minDate = useMemo(() => {
+    // Correct timezone calculation for America/Sao_Paulo (no 21h UTC jump)
+    return new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+  }, []);
 
   useEffect(() => {
     if (!service || !date) return;

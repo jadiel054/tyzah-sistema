@@ -11,7 +11,9 @@ type Appt = {
 type Reminder = Appt & { whatsappLink: string };
 
 export default function AdminHojePage() {
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(() =>
+    new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" })
+  );
   const [appts, setAppts] = useState<Appt[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [blockReason, setBlockReason] = useState("");
